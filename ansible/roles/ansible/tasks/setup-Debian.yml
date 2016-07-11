@@ -1,0 +1,25 @@
+---
+- name: Ensure python dependancies are installed ...
+  apt: >
+    name=python-setuptools
+    state=latest
+
+- name: Install Ansible ...
+  command: >
+    easy_install ansible
+
+- name: Create Ansible Config Dir ...
+  file: >
+    path=/etc/ansible
+    state=directory
+    owner=root
+    group=root
+    mode=0644
+
+- name: Copy Ansible Config ...
+  copy: >
+    src=ansible.cfg
+    dest=/etc/ansible/ansible.cfg
+    owner=root
+    group=root
+    mode=0644

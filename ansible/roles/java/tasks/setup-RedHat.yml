@@ -1,0 +1,6 @@
+---
+- name: Install Java JDK ...
+  yum: >
+    name={{item}}
+    state=latest
+  with_items: "{{javaPackages}}"

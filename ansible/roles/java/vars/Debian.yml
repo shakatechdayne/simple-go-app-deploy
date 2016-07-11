@@ -1,0 +1,4 @@
+---
+javaPackages:
+  - openjdk-8-jdk
+javaRepoUrl: 'deb http://ftp.debian.org/debian jessie-backports main'

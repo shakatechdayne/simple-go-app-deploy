@@ -1,0 +1,11 @@
+# Installs and configure nginx as a load balancer
+---
+# Install tasks
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+# Config tasks
+- include: config.yml

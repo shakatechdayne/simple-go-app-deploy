@@ -1,0 +1,7 @@
+---
+- hosts: appnode
+  become: yes
+  remote_user: "{{sshUser}}"
+  gather_facts: true
+  roles:
+    - goapp

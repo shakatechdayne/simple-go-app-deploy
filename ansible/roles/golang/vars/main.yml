@@ -1,0 +1,4 @@
+---
+goName: 'go{{goVersion}}.{{goPlatform}}'
+goArchive: '{{goName}}.tar.gz'
+goArchUrl: 'https://storage.googleapis.com/golang/{{goArchive}}'

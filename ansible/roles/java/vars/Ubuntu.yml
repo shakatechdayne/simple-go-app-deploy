@@ -1,0 +1,4 @@
+---
+javaPackages:
+  - openjdk-8-jdk
+javaRepoUrl: 'ppa:openjdk-r/ppa'

@@ -1,0 +1,6 @@
+---
+jenkinsRepoUrl: "http://pkg.jenkins-ci.org/redhat/jenkins.repo"
+jenkinsRepoKey: "http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key"
+jenkinsInitFile: /etc/sysconfig/jenkins
+jenkinsPortParam: JENKINS_PORT
+jenkinsJavaParam: JAVA_ARGS

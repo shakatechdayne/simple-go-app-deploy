@@ -1,0 +1,31 @@
+---
+jenkinsConnDelay: 5
+jenkinsConnRetry: 30
+jenkinsHostName: localhost
+jenkinsPort: 8080
+jenkinsJarLoc: /opt/jenkins-cli.jar
+jenkinsPlugins: ["golang","git","github"]
+jenkinsUrlPrefix: ""
+
+jenkinsAdminUser: admin
+jenkinsAdminPass: admin
+
+jenkinsUser: "user1"
+jenkinsUserPass: "Pa55w0rd"
+
+jenkinsGoLangBuildConf: config-golang.xml
+jenkinsGoLangDeployBuildConf: config-golang-deploy.xml
+jenkinsGoLangRepoUrl: https://github.com/shakatechdayne/sample-go-app.git
+jenkinsKeyPairLoc: '/home/jenkins/.ssh/id_rsa'
+jenkinsHomeDir: '/home/jenkins/.ssh'
+jenkinsGoAppJob: golang
+jenkinsGoAppDeployJob: golang-deploy
+# Vars for deployment script
+appArtifactLoc: "/var/lib/jenkins/jobs/{{jenkinsGoAppJob}}/workspace/bin/app"
+appDir: "/opt/goapp/"
+appUser: goapp
+appGroup: goapp
+appService: goapp
+jenkinsGoAppDeployScript: "/opt/deploy-goapp.yml"
+jenksinsGoAppDeployInv: "/opt/inventory.ini"
+appServerIps: ["10.84.0.23", "10.84.0.80"]

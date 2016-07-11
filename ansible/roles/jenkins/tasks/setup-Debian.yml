@@ -1,0 +1,25 @@
+---
+- name: Ensure dependencies are installed ...
+  apt: >
+    name={{item}}
+    state=latest
+  with_items:
+    - curl
+    - git
+
+- name: Add Jenkins apt repo key ...
+  apt_key: >
+    url={{jenkinsRepoKey}}
+    state=present
+
+- name: Add Jenkins apt repo ...
+  apt_repository: >
+    repo={{jenkinsRepoUrl}}
+    state=present
+    update_cache=yes
+
+- name: Install Jenkins ...
+  apt: >
+    name=jenkins
+    state=latest
+  register: jenkinsInstallPackage

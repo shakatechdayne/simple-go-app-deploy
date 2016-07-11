@@ -1,0 +1,13 @@
+upstream {{ item.name }} {
+{% for upstream in item.upstreams %}
+     server {{upstream}}:{{item.port}} max_fails=1 fail_timeout=10s;
+{% endfor %}
+}
+
+server {
+       listen         80;
+       server_name    {{ item.name }};
+       location / {
+        proxy_pass http://{{ item.name }};
+    }
+}

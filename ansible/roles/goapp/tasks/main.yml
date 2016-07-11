@@ -1,0 +1,10 @@
+# Configures Application Server
+---
+- name: Include OS-specific variables ...
+  include_vars: "{{ ansible_os_family }}.yml"
+
+# Create necessry Users
+- include: users.yml
+
+# Install the goapp service
+- include: service.yml

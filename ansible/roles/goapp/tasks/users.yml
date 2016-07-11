@@ -1,0 +1,24 @@
+---
+- name: Create app group ...
+  group: >
+    name={{goAppGroup}}
+    state=present
+
+- name: Create app user ...
+  user: >
+    name={{goAppUser}}
+    shell=/sbin/nologin
+    state=present
+
+- name: Create deploy user ...
+  user: >
+    name={{goAppDeployUser}}
+    group={{goAppDeployGroup}}
+    shell=/bin/bash
+    state=present
+    password={{goAppDeployPass}}
+    home={{goAppDeployHomeDir}}
+
+- name: Add no pass for sudo ...
+  shell: >
+    echo '{{goAppDeployUser}} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/90-deploy-users

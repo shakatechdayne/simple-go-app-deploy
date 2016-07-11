@@ -1,0 +1,21 @@
+---
+- name: Create app folder ...
+  file: >
+    path={{goAppDir}}
+    state=directory
+    owner={{goAppUser}}
+    group={{goAppGroup}}
+    mode=0755
+
+- name: Setup app service ...
+  template: >
+    src=goapp.service
+    dest=/lib/systemd/system/goapp.service
+    owner=root
+    group=root
+    mode=0644
+
+- name: Enable app service ...
+  service: >
+    name=goapp
+    enabled=yes

@@ -1,0 +1,12 @@
+---
+- hosts: webnode
+  become: yes
+  gather_facts: true
+  remote_user: "{{sshUser}}"
+  vars:
+    - balancer_vhosts:
+        - {name: "{{appUrl}}",
+           upstreams: ['{{appNode1ip}}', '{{appNode2ip}}'],
+           port: "{{appPort}}"}
+  roles:
+    - balancer

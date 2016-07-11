@@ -1,0 +1,55 @@
+---
+- name: Ensure URL prefix is configured ...
+  lineinfile: >
+    dest={{jenkinsInitFile}}
+    insertafter='^JENKINS_ARGS='
+    regexp='^JENKINS_ARGS=\"\$JENKINS_ARGS --prefix='
+    line='JENKINS_ARGS="$JENKINS_ARGS --prefix={{jenkinsUrlPrefix}}"'
+    state=present
+  register: jenkinsInitPrefix
+  when: jenkinsInstallPackage.changed
+
+- name: Immediately restart Jenkins init changes ...
+  service: >
+    name=jenkins
+    state=restarted
+  when: jenkinsInitPrefix.changed
+
+- name: Set Jenkins Port ...
+  lineinfile: >
+    backrefs=yes
+    dest={{jenkinsInitFile}}
+    regexp='^{{jenkinsPortParam}}='
+    line='{{jenkinsPortParam}}={{jenkinsPort}}'
+  register: jenkinsPortConfig
+  when: jenkinsInstallPackage.changed
+
+- name: Disable Jenkins setup wizard ...
+  lineinfile: >
+    backrefs=yes
+    dest={{jenkinsInitFile}}
+    regexp='^{{jenkinsJavaParam}}=.*'
+    line='{{jenkinsJavaParam}}="-Djava.aws.headless=true -Djenkins.install.runSetupWizard=false"'
+  register: jenksinsJvmOpt
+  when: jenkinsInstallPackage.changed
+
+- name: Create custom init scripts dir ...
+  file: >
+    path=/var/lib/jenkins/init.groovy.d
+    state=directory
+    owner=jenkins
+    group=jenkins
+    mode=0775
+
+- name: Configure default users ...
+  template: >
+    src=basic-security.groovy
+    dest=/var/lib/jenkins/init.groovy.d/basic-security.groovy
+  register: jenkinsUserConf
+  when: jenkinsInstallPackage.changed
+
+- name: Immediately restart Jenkins after port or user changes ...
+  service: >
+    name=jenkins
+    state=restarted
+  when: jenkinsUserConf.changed or jenkinsPortConfig.changed or jenkinsJvmOpt.changed

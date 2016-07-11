@@ -1,0 +1,9 @@
+---
+- hosts: buildnode
+  gather_facts: true
+  become: yes
+  remote_user: "{{sshUser}}"
+  roles:
+    - { role: jenkins, appServerIps: "{{ipList}}", jenkinsUser: "{{buildUser}}",
+      jenkinsUserPass: "{{buildPass}}", jenkinsGoLangRepoUrl: "{{gitUrl}}",
+      jenkinsGoAppJob: "{{buildJobName}}"}

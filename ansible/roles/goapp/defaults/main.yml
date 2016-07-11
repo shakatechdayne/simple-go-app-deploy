@@ -1,0 +1,7 @@
+---
+goAppDir: '/opt/goapp'
+goAppUser: goapp
+goAppGroup: goapp
+goAppDeployUser: jenkins
+goAppDeployPass: '$6$8364yrhf5&USHBw1$FXVqr16QEdeLsEW35Y5eKhvAa5wbAcLStGJ6.CWGRMcZ4EYVaHqUfPnu2BecTRUZGWvFEvu8nsb/79t0DmPmU/'
+goAppDeployHomeDir: '/home/jenkins'

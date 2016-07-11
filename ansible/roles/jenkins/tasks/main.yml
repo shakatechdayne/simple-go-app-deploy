@@ -1,0 +1,57 @@
+---
+# Setup OS specific variables
+- name: Include OS-specific variables ...
+  include_vars: "{{ansible_os_family}}.yml"
+
+# Install tasks
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+# Configuration tasks
+- include: setup.yml
+
+# Ensure Jenkins starts as a service
+- name: Install Jenkins service ...
+  service: >
+    name=jenkins
+    state=started
+    enabled=yes
+
+- name: Wait for Jenkins to start ...
+  shell: "curl -D - --silent --max-time 5 http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix}}/cli/"
+  register: result
+  until: (result.stdout.find("403 Forbidden") != -1) or (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+  retries: "{{jenkinsConnRetry}}"
+  delay: "{{jenkinsConnDelay}}"
+  changed_when: false
+
+- name: Get the jenkins-cli jarfile ...
+  get_url: >
+    url=http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix}}/jnlpJars/jenkins-cli.jar
+    dest={{jenkinsJarLoc}}
+  register: jarFileGet
+  until: "'OK' in jarFileGet.msg or 'file already exists' in jarFileGet.msg"
+  retries: 5
+  delay: 10
+
+- name: Remove Jenkins security init scripts ...
+  file: >
+    path=/var/lib/jenkins/init.groovy.d/basic-security.groovy
+    state=absent
+
+- name: Get admin pass ...
+  shell: >
+    cat /var/lib/jenkins/secrets/initialAdminPassword
+  register: jenkinsAdminPass
+
+# Update Jenkins, install plugins, create jobs and users
+- include: config.yml
+
+# Add Go App Jobs to configuration
+- include: jobs.yml
+
+# Add SSH key pair and upload pub key to go App servers
+- include: auth.yml

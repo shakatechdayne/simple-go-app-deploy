@@ -1,0 +1,51 @@
+---
+- name: Create Jenkins updates folder ...
+  file: >
+    path=/var/lib/jenkins/updates
+    owner=jenkins
+    group=jenkins
+    mode=0755
+    state=directory
+  register: jenkinsPluginDirCreate
+
+- name: Update Jenkins plugin data ...
+  shell: >
+    curl -L https://updates.jenkins-ci.org/update-center.json | sed '1d;$d' > /var/lib/jenkins/updates/default.json
+    creates=/var/lib/jenkins/updates/default.json
+
+- name: Permissions for default.json ...
+  file: >
+    path=/var/lib/jenkins/updates/default.json
+    owner=jenkins
+    group=jenkins
+    mode=0755
+  when: jenkinsPluginDirCreate.changed
+
+- name: Get CSRF crumb ...
+  command: >
+    curl --user {{jenkinsAdminUser}}:{{jenkinsAdminPass.stdout}}
+    http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix | default('') }}/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\)
+  register: jenkinsCrumb
+
+- name: Enable JNLP TCP Port ...
+  command: >
+    curl -X POST --data '_.useSecurity=on&slaveAgentPort.type=random&stapler-class=hudson.security.LegacySecurityRealm&%24class=hudson.security.LegacySecurityRealm&realm=1&stapler-class=hudson.security.HudsonPrivateSecurityRealm&%24class=hudson.security.HudsonPrivateSecurityRealm&stapler-class=hudson.security.AuthorizationStrategy%24Unsecured&%24class=hudson.security.AuthorizationStrategy%24Unsecured&stapler-class=hudson.security.LegacyAuthorizationStrategy&%24class=hudson.security.LegacyAuthorizationStrategy&authorization=2&stapler-class=hudson.security.FullControlOnceLoggedInAuthorizationStrategy&%24class=hudson.security.FullControlOnceLoggedInAuthorizationStrategy&stapler-class=hudson.markup.EscapedMarkupFormatter&%24class=hudson.markup.EscapedMarkupFormatter&_.csrf=on&issuer=0&stapler-class=hudson.security.csrf.DefaultCrumbIssuer&%24class=hudson.security.csrf.DefaultCrumbIssuer&_.masterToSlaveAccessControl=on&core%3Aapply=true&json=%7B%22useSecurity%22%3A+%7B%22slaveAgentPort%22%3A+%7B%22value%22%3A+%22%22%2C+%22type%22%3A+%22random%22%7D%2C+%22disableRememberMe%22%3A+false%2C+%22realm%22%3A+%7B%22value%22%3A+%221%22%2C+%22stapler-class%22%3A+%22hudson.security.HudsonPrivateSecurityRealm%22%2C+%22%24class%22%3A+%22hudson.security.HudsonPrivateSecurityRealm%22%2C+%22allowsSignup%22%3A+false%7D%2C+%22authorization%22%3A+%7B%22value%22%3A+%222%22%2C+%22stapler-class%22%3A+%22hudson.security.FullControlOnceLoggedInAuthorizationStrategy%22%2C+%22%24class%22%3A+%22hudson.security.FullControlOnceLoggedInAuthorizationStrategy%22%2C+%22allowAnonymousRead%22%3A+false%7D%7D%2C+%22%22%3A+%220%22%2C+%22markupFormatter%22%3A+%7B%22stapler-class%22%3A+%22hudson.markup.EscapedMarkupFormatter%22%2C+%22%24class%22%3A+%22hudson.markup.EscapedMarkupFormatter%22%7D%2C+%22hudson-security-csrf-GlobalCrumbIssuerConfiguration%22%3A+%7B%22csrf%22%3A+%7B%22issuer%22%3A+%7B%22value%22%3A+%220%22%2C+%22stapler-class%22%3A+%22hudson.security.csrf.DefaultCrumbIssuer%22%2C+%22%24class%22%3A+%22hudson.security.csrf.DefaultCrumbIssuer%22%2C+%22excludeClientIPFromCrumb%22%3A+false%7D%7D%7D%2C+%22jenkins-model-DownloadSettings%22%3A+%7B%22useBrowser%22%3A+false%7D%2C+%22jenkins-security-s2m-MasterKillSwitchConfiguration%22%3A+%7B%22masterToSlaveAccessControl%22%3A+%7B%7D%7D%2C+%22core%3Aapply%22%3A+%22true%22%7D'
+    --header 'Content-Type: application/x-www-form-urlencoded' --compressed
+    --header '{{jenkinsCrumb.stdout}}' --user {{jenkinsAdminUser}}:{{jenkinsAdminPass.stdout}}
+    http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix | default('') }}/configureSecurity/configure
+
+- name: Install Jenkins plugins ...
+  command: >
+    java -jar {{jenkinsJarLoc}} -s http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix | default('') }}/
+    install-plugin {{item}}
+    --username {{jenkinsAdminUser}}
+    --password {{jenkinsAdminPass.stdout}}
+    creates=/var/lib/jenkins/plugins/{{item}}.jpi
+  with_items: "{{jenkinsPlugins}}"
+  notify: restart jenkins
+
+- name: Create Jenkins users ...
+  shell: >
+    echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("{{jenkinsUser}}", "{{jenkinsUserPass}}")' |
+    java -jar {{jenkinsJarLoc}} -s http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix | default('') }}/
+    groovy = --username {{jenkinsAdminUser}} --password {{jenkinsAdminPass.stdout}}

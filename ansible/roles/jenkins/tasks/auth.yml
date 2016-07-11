@@ -1,0 +1,36 @@
+# Setup the necessary key pairs for Ansible deployment script
+---
+- name: Jenkins Home Dir ...
+  file: >
+    path={{jenkinsHomeDir}}
+    state=directory
+    owner=jenkins
+    group=jenkins
+    mode=0700
+
+- name: Generate SSH key pair ...
+  user: >
+    name=jenkins
+    generate_ssh_key=yes
+    ssh_key_bits=2048
+    ssh_key_file={{jenkinsKeyPairLoc}}
+
+- name: Fetch SSH pub key ...
+  fetch: >
+    src={{jenkinsKeyPairLoc}}.pub
+    dest=/tmp/id_rsa.tmp
+    flat=yes
+
+- name: Copy Jenkins SSH pub key to app servers ...
+  authorized_key: >
+    user=jenkins
+    key={{lookup('file', '/tmp/id_rsa.tmp')}}
+  delegate_to: "{{item}}"
+  with_items: "{{groups['appnode']}}"
+
+- name: Clean up temp files ...
+  local_action: >
+    file
+    path=/tmp/id_rsa.tmp
+    state=absent
+  become: no

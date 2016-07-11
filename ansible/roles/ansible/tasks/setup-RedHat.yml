@@ -1,0 +1,9 @@
+---
+- name: Ensure python dependancies are installed ...
+  yum: >
+    name=python-setuptools
+    state=latest
+
+- name: Install Ansible ...
+  command: >
+    easy_install ansible

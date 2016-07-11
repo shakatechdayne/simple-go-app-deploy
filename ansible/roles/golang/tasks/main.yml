@@ -1,0 +1,24 @@
+# Installs Go Tools
+---
+- name: Download Go archive ...
+  get_url: >
+    url={{goArchUrl}}
+    dest=/tmp/{{goArchive}}
+    owner=root
+    group=root
+    mode=0644
+
+- name: Unarchive go ...
+  unarchive: >
+    copy=no
+    src=/tmp/{{goArchive}}
+    dest=/usr/local
+    creates=/usr/local/go/bin/go
+
+- name: Set go environment variables ...
+  copy: >
+    src=go.sh
+    dest=/etc/profile.d/go.sh
+    mode=0644
+    owner=root
+    group=root

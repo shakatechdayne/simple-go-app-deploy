@@ -1,0 +1,6 @@
+---
+jenkinsRepoUrl: "deb http://pkg.jenkins-ci.org/debian binary/"
+jenkinsRepoKey: "http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key"
+jenkinsInitFile: /etc/default/jenkins
+jenkinsPortParam: HTTP_PORT
+jenkinsJavaParam: JAVA_ARGS

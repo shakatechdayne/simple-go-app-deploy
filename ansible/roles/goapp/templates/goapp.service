@@ -1,0 +1,9 @@
+[Unit]
+Description=Go App HTTP Example
+After=network.target
+
+[Service]
+ExecStart={{goAppDir}}/app
+
+[Install]
+WantedBy=multi-user.target

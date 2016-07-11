@@ -1,0 +1,53 @@
+---
+- name: Copy Go Lang App Build Job XML ...
+  template: >
+    src=config-golang.xml
+    dest=/tmp/{{jenkinsGoLangBuildConf}}
+    owner=root
+    group=root
+    mode=0755
+
+- name: Create Go Lang App Build Job ...
+  shell: >
+    java -jar {{jenkinsJarLoc}} -s http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix | default('') }}/
+    create-job {{jenkinsGoAppJob}}
+    --username {{jenkinsAdminUser}}
+    --password {{jenkinsAdminPass.stdout}}
+    < /tmp/{{jenkinsGoLangBuildConf}}
+  register: goLangBuild
+
+- name: Copy the deployment script ...
+  template: >
+    src=deploy-goapp.yml
+    dest={{jenkinsGoAppDeployScript}}
+    owner=jenkins
+    group=jenkins
+    mode=0644
+  when: goLangBuild.changed
+
+- name: Create app server inventory ...
+  template: >
+    src=inventory.ini
+    dest={{jenksinsGoAppDeployInv}}
+    owner=jenkins
+    group=jenkins
+    mode=0644
+  when: goLangBuild.changed
+
+- name: Copy Go Lang App Deploy Build Job XML ...
+  template: >
+    src=config-golang-deploy.xml
+    dest=/tmp/{{jenkinsGoLangDeployBuildConf}}
+    owner=root
+    group=root
+    mode=0755
+  when: goLangBuild.changed
+
+- name: Create Go Lang App Deployment Job ...
+  shell: >
+    java -jar {{jenkinsJarLoc}} -s http://{{jenkinsHostName}}:{{jenkinsPort}}{{jenkinsUrlPrefix | default('') }}/
+    create-job {{jenkinsGoAppDeployJob}}
+    --username {{jenkinsAdminUser}}
+    --password {{jenkinsAdminPass.stdout}}
+    < /tmp/{{jenkinsGoLangDeployBuildConf}}
+  when: goLangBuild.changed

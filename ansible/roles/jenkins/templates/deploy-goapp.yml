@@ -1,0 +1,18 @@
+---
+- hosts: appnodes
+  gather_facts: false
+  become: yes
+  remote_user: "jenkins"
+  tasks:
+    - name: Copy built app artefact to app servers ...
+      copy: >
+        src={{appArtifactLoc}}
+        dest={{appDir}}
+        owner={{appUser}}
+        group={{appGroup}}
+        mode=0755
+
+    - name: Restart the app service ...
+      service: >
+        name={{appService}}
+        state=restarted

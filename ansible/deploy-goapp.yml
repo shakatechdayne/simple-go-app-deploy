@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: false
+  become: yes
+  remote_user: "jenkins"
+  vars:
+    appArtifactLoc: "/var/lib/jenkins/jobs/goapp/workspace/src/app/app"
+    appDir: "/opt/goapp/"
+    appUser: goapp
+    appGroup: goapp
+    appService: goapp
+  tasks:
+    - name: Copy built app artefact to app servers ...
+      copy: >
+        src={{appArtifactLoc}}
+        dest={{appDir}}
+        owner={{appUser}}
+        group={{goapp}}
+        mode=0755
+
+    - name: Restart the app service ...
+      service: >
+        name={{appService}}
+        state=restarted
+    
