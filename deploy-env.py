@@ -2,11 +2,11 @@ from boto3.session import Session
 from botocore.exceptions import ClientError
 import boto3, logging, os, getpass, subprocess, validators, time, jenkins, httplib
 
-""" Logging Configuration """
+# Logging Configuration
 logging.basicConfig(filename="goAppEnvDeployment.log",
 					format= '%(asctime)s - %(levelname)s: %(message)s',
 					level=logging.DEBUG)
-					
+
 """
 Defines our GO application environment and provides necessary functions to
 validate
@@ -39,7 +39,7 @@ class goAppEnv ():
 			aws_secret_access_key = self.strCloudPass,
 			region_name = self.strRegion)
 
-	""" Validates the provided AWS Access key, Secret key and SSH Key Pair """
+	# Validates the provided AWS Access key, Secret key and SSH Key Pair
 	def validateAwsKeyPair (self, strKeyPair, strDir):
 		self.keyPair = strKeyPair
 
@@ -71,7 +71,7 @@ class goAppEnv ():
 
 			return False
 
-	""" Validates the provided VPC ID and Subnet information """
+	# Validates the provided VPC ID and Subnet information
 	def validateAwsVpcId (self, strVpc, strSubnet):
 		self.vpcId = strVpc
 		self.Subnet = strSubnet
@@ -119,11 +119,10 @@ class goAppEnv ():
 			return False
 
 	def buildAwsInf (self):
-		""" Change working directory """
 		os.chdir(os.getcwd() + "/terraform/aws")
 		outcome = False
 		try:
-			""" Create variable file """
+			# Create variable file
 			varFile = open('create-env.tvars', 'w')
 			varFile.truncate()
 			varFile.write('awsKey="%s"\n' % self.strCloudKey)
@@ -186,11 +185,9 @@ class goAppEnv ():
 		return outcome
 
 	def configSrvViaAnsible (self, strPlayBook, strInventory, dictVars ):
-		""" Change the working directory """
 		os.chdir(self.invDir)
-		outcome = False
 
-		""" Format the list of extra variables for the play """
+		# Format the list of extra variables for the play
 		extraVars = "--extra-vars='{"
 		keyCount = 0
 		dictVarsSize = len(dictVars)
@@ -206,17 +203,11 @@ class goAppEnv ():
 		print("Calling command: %s" % command)
 		try:
 			result = subprocess.call([command], shell=True)
-			#if result == 1:
-			#	return False
-			#else:
-			#	outcome = True
 			return True
 		except Exception, e:
 			logging.error("An error occured while applying the playbook (%s): %s" % (strPlayBook, e))
 			print("An error occured while applying the playbook (%s): %s" % (strPlayBook, e))
 			return False
-
-		return outcome
 
 	def kickOffGoAppBuild (self):
 		try:
@@ -250,10 +241,8 @@ class goAppEnv ():
 			print data2
 
 			if data1 == data2:
-				#print("Responses are equal!")
 				return False
 			else:
-				#print("Responses are not equal!")
 				return True
 		except Exception, e:
 			logging.error("The following error occured while trying to test the GO App via the balancer: %s" % e)
