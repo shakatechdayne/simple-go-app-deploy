@@ -1,5 +1,16 @@
 ---
+- name: Installing Nginx Repo ...
+  apt_repository: >
+    repo={{nginxRepoUrl}}
+
+- name: Add Nginx Repo Signing Key ...
+  apt_key: >
+    url={{nginxRepoKeyUrl}}
+    state=present
+  when: ansible_distribution == 'Debian'
+  
 - name: Install Nginx ...
   apt: >
     name=nginx
     state=latest
+    update_cache=yes

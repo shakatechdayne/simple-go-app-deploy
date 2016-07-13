@@ -1,0 +1,3 @@
+---
+nginxRepoUrl: 'deb http://nginx.org/packages/debian/ jessie nginx'
+nginxRepoKeyUrl: 'http://nginx.org/packages/keys/nginx_signing.key'
